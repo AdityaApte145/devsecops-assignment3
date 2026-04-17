@@ -1,0 +1,3 @@
+- name: Copy docker-compose.yml file 
+  run: | 
+    scp docker-compose.yml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:~/docker-compose.yml 
