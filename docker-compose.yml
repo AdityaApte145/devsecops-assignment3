@@ -37,14 +37,12 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0 
     container_name: elasticsearch 
     environment: 
-      - node.name=elasticsearch 
-      - cluster.name=es-docker-cluster 
-      - discovery.type=single-node 
-      - bootstrap.memory_lock=true 
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" 
-      - xpack.security.enabled=false
-      - logger.org.elasticsearch=INFO
-      - bootstrap.system_call_filter=false
+      - node.name=elasticsearch
+      - cluster.name=es-docker-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - JAVA_TOOL_OPTIONS=-XX:-UseContainerSupport
       - ES_JAVA_OPTS=-Xms512m -Xmx512m -Djava.security.manager=allow
     ulimits: 
       memlock: 
