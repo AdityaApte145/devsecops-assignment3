@@ -10,7 +10,7 @@ resource "google_compute_instance" "vm" {
   }
 
   network_interface {
-    network = google_compute_network.vpc.name
+    network = google_compute_network.vpc.id
 
     access_config {
       // gives public IP

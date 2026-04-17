@@ -1,90 +1,93 @@
 services:
   backend-flask:
-    image: adityaapte/lms-backend:1.0.0
-    pull_policy: build
+    build:
+      context: ./backend-flask
     ports:
       - "4000:4000"
-    environment: 
-      - FLASK_ENV=development 
-      - FLASK_APP=app.py 
-      - NEW_RELIC_LICENSE_KEY=eu01x9b6299ec63cfa5dd49585e08e6ee264NRAL 
-      - NEW_RELIC_APP_NAME=${NEW_RELIC_APP_NAME:-LMS System - Backend} 
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+      - NEW_RELIC_LICENSE_KEY=eu01x9b6299ec63cfa5dd49585e08e6ee264NRAL
+      - NEW_RELIC_APP_NAME=${NEW_RELIC_APP_NAME:-LMS System - Backend}
       - NEW_RELIC_ENVIRONMENT=${NEW_RELIC_ENVIRONMENT:-production}
-    logging: 
-      driver: "json-file" 
-      options: 
-        max-size: "10m" 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
         max-file: "3"
     networks:
       - app-network
 
   frontend:
-    image: adityaapte/lms-frontend:1.0.0
-    pull_policy: build
+    build:
+      context: ./frontend-react
     ports:
       - "80:80"
     depends_on:
       - backend-flask
-    logging: 
-      driver: "json-file" 
-      options: 
-        max-size: "10m" 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
         max-file: "3"
     networks:
       - app-network
 
-  elasticsearch: 
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0 
-    container_name: elasticsearch 
-    environment: 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
+    container_name: elasticsearch
+    environment:
       - node.name=elasticsearch
       - cluster.name=es-docker-cluster
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - JAVA_TOOL_OPTIONS=-XX:-UseContainerSupport
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m -Djava.security.manager=allow
-    ulimits: 
-      memlock: 
-        soft: -1 
-        hard: -1 
-    volumes: 
-      - elasticsearch-data:/usr/share/elasticsearch/data 
-    ports: 
-      - "9200:9200" 
-    networks: 
-      - app-network 
- 
-  kibana: 
-    image: docker.elastic.co/kibana/kibana:7.17.0 
-    container_name: kibana 
-    environment: 
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200 
-    ports: 
-      - "5601:5601" 
-    depends_on: 
-      - elasticsearch 
-    networks: 
-      - app-network 
-  
-  filebeat: 
-    image: docker.elastic.co/beats/filebeat:7.17.0 
-    container_name: filebeat 
-    user: root 
-    volumes: 
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro 
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro 
-      - /var/run/docker.sock:/var/run/docker.sock:ro 
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - app-network
+    healthcheck:
+      test: curl -f http://localhost:9200 || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.8
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_HOST=0.0.0.0
+      - SERVER_NAME=kibana
+      - SERVER_PUBLICBASEURL=http://34.39.97.100:5601
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.8
+    container_name: filebeat
+    user: root
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - filebeat-logs:/var/log/filebeat
-    depends_on: 
-      - elasticsearch 
-    networks: 
-      - app-network 
+    depends_on:
+      - elasticsearch
+    networks:
+      - app-network
 
 networks:
   app-network:
     driver: bridge
 
-volumes: 
-  elasticsearch-data: 
+volumes:
+  elasticsearch-data:
   filebeat-logs:
