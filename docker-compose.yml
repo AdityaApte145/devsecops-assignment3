@@ -1,7 +1,7 @@
 services:
   backend-flask:
     image: adityaapte/lms-backend:1.0.0
-    pull_policy: always
+    pull_policy: build
     ports:
       - "4000:4000"
     environment: 
@@ -20,7 +20,7 @@ services:
 
   frontend:
     image: adityaapte/lms-frontend:1.0.0
-    pull_policy: always
+    pull_policy: build
     ports:
       - "80:80"
     depends_on:
