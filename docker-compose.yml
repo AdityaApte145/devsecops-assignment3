@@ -1,0 +1,25 @@
+services:
+  backend-flask:
+    image: adityaapte/lms-backend:1.0.0
+    pull_policy: always
+    ports:
+      - "4000:4000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+    networks:
+      - app-network
+
+  frontend:
+    image: adityaapte/lms-frontend:1.0.0
+    pull_policy: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend-flask
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
