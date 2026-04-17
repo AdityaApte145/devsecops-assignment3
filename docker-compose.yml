@@ -7,7 +7,7 @@ services:
     environment: 
       - FLASK_ENV=development 
       - FLASK_APP=app.py 
-      - NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} 
+      - NEW_RELIC_LICENSE_KEY=eu01x9b6299ec63cfa5dd49585e08e6ee264NRAL 
       - NEW_RELIC_APP_NAME=${NEW_RELIC_APP_NAME:-LMS System - Backend} 
       - NEW_RELIC_ENVIRONMENT=${NEW_RELIC_ENVIRONMENT:-production}
     networks:
